@@ -1,0 +1,1 @@
+function g(t){if(!t)return"";const r=new Date(t),n=r.getFullYear(),e=String(r.getMonth()+1).padStart(2,"0"),a=String(r.getDate()).padStart(2,"0"),i=String(r.getHours()).padStart(2,"0"),o=String(r.getMinutes()).padStart(2,"0");return`${n}-${e}-${a} ${i}:${o}`}function s(t){return t?t>=1e3?(t/1e3).toFixed(1)+"k":String(t):"0"}export{s as a,g as f};
