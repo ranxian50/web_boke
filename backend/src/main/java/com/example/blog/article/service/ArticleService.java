@@ -201,11 +201,14 @@ public class ArticleService {
         return toVO(articleRepository.save(article));
     }
 
-    /** 删除文章 */
+    /** 删除文章（仅作者或管理员可删除） */
     @Transactional
-    public void deleteArticle(Long id) {
-        if (!articleRepository.existsById(id)) {
-            throw new EntityNotFoundException("文章不存在");
+    public void deleteArticle(Long id, Long currentUserId, String currentUserRole) {
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("文章不存在"));
+        // 权限校验：仅作者或 ADMIN 可删除
+        if (!article.getUserId().equals(currentUserId) && !"ADMIN".equals(currentUserRole)) {
+            throw new org.springframework.security.access.AccessDeniedException("无权限删除此文章");
         }
         articleTagRepository.deleteByArticleId(id);
         articleRepository.deleteById(id);

@@ -1,5 +1,7 @@
 package com.example.blog.report.service;
 
+import com.example.blog.article.entity.Article;
+import com.example.blog.article.repository.ArticleRepository;
 import com.example.blog.common.PageResult;
 import com.example.blog.report.entity.Report;
 import com.example.blog.report.repository.ReportRepository;
@@ -12,6 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 举报业务服务
@@ -21,6 +27,7 @@ import java.time.LocalDateTime;
 public class ReportService {
 
     private final ReportRepository reportRepository;
+    private final ArticleRepository articleRepository;
 
     /** 提交举报 */
     public Report createReport(Long articleId, String nickname, String email, String reason, String description) {
@@ -34,8 +41,8 @@ public class ReportService {
         return reportRepository.save(report);
     }
 
-    /** 分页获取举报 */
-    public PageResult<Report> getReports(int page, int size, String status) {
+    /** 分页获取举报（含文章标题） */
+    public PageResult<Map<String, Object>> getReports(int page, int size, String status) {
         PageRequest pr = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<Report> result;
         if (status != null && !status.isBlank()) {
@@ -43,7 +50,27 @@ public class ReportService {
         } else {
             result = reportRepository.findAll(pr);
         }
-        return new PageResult<>(result.getContent(), result.getTotalElements(), page, size);
+
+        List<Map<String, Object>> records = result.getContent().stream().map(r -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", r.getId());
+            m.put("articleId", r.getArticleId());
+            // 获取文章标题
+            String articleTitle = articleRepository.findById(r.getArticleId())
+                    .map(Article::getTitle).orElse("未知文章");
+            m.put("articleTitle", articleTitle);
+            m.put("reporterNickname", r.getReporterNickname());
+            m.put("reporterEmail", r.getReporterEmail());
+            m.put("reason", r.getReason());
+            m.put("description", r.getDescription());
+            m.put("status", r.getStatus());
+            m.put("handleNote", r.getHandleNote());
+            m.put("createTime", r.getCreateTime());
+            m.put("handleTime", r.getHandleTime());
+            return m;
+        }).collect(Collectors.toList());
+
+        return new PageResult<>(records, result.getTotalElements(), page, size);
     }
 
     /** 处理举报 */

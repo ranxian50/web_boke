@@ -2,6 +2,7 @@ package com.example.blog.comment.controller;
 
 import com.example.blog.comment.entity.Comment;
 import com.example.blog.comment.service.CommentService;
+import com.example.blog.common.PageResult;
 import com.example.blog.common.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -47,5 +48,20 @@ public class CommentController {
     @GetMapping("/articles/{articleId}/comments/count")
     public Result<Long> getCommentCount(@PathVariable Long articleId) {
         return Result.success((long) commentService.getCommentsByArticle(articleId).size());
+    }
+
+    /** 管理员：分页查询所有评论 */
+    @GetMapping("/admin/comments")
+    public Result<PageResult<Map<String, Object>>> adminList(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return Result.success(commentService.getCommentsForAdmin(page, size));
+    }
+
+    /** 管理员：删除评论 */
+    @DeleteMapping("/admin/comments/{id}")
+    public Result<Void> adminDelete(@PathVariable Long id) {
+        commentService.deleteComment(id);
+        return Result.success();
     }
 }

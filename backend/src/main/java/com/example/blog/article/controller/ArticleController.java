@@ -89,10 +89,14 @@ public class ArticleController {
         return Result.success(articleService.updateArticle(id, request));
     }
 
-    /** 删除文章 */
+    /** 删除文章（仅作者或管理员可删除） */
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id) {
-        articleService.deleteArticle(id);
+    public Result<Void> delete(@PathVariable Long id, Authentication auth) {
+        Long userId = getUserIdFromAuth(auth);
+        String role = auth.getAuthorities().stream()
+                .findFirst().map(g -> g.getAuthority().replace("ROLE_", ""))
+                .orElse("USER");
+        articleService.deleteArticle(id, userId, role);
         return Result.success();
     }
 

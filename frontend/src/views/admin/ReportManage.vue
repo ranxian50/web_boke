@@ -15,6 +15,7 @@
       <el-table :data="reports" stripe v-loading="loading" empty-text="暂无举报">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="reporterNickname" label="举报人" width="100" />
+        <el-table-column prop="articleTitle" label="被举报文章" min-width="200" show-overflow-tooltip />
         <el-table-column prop="reason" label="原因" width="120" />
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         <el-table-column prop="status" label="状态" width="100">
@@ -66,7 +67,7 @@ async function handleReport(id, action) {
   const actionText = action === 'RESOLVED' ? '处理' : '驳回'
   try {
     await ElMessageBox.confirm(`确定${actionText}该举报吗？`, '确认')
-    await request.put(`/reports/${id}/handle`, null, { params: { action } })
+    await request.put(`/reports/${id}/handle`, { action })
     ElMessage.success(`举报已${actionText}`)
     loadReports()
   } catch(e) {}

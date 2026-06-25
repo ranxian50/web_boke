@@ -44,4 +44,18 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
     }
+
+    /**
+     * 更新用户信息（昵称、头像）
+     */
+    public User updateProfile(Long userId, String nickname, String avatar) {
+        User user = findById(userId);
+        if (nickname != null && !nickname.isBlank()) {
+            user.setNickname(nickname);
+        }
+        if (avatar != null) {
+            user.setAvatar(avatar);
+        }
+        return userRepository.save(user);
+    }
 }

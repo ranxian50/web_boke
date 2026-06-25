@@ -35,15 +35,20 @@ public class SecurityConfig {
                 // 公开接口
                 .requestMatchers("/api/v1/auth/login").permitAll()
                 .requestMatchers("/api/v1/auth/register").permitAll()
+                .requestMatchers("/api/v1/captcha/**").permitAll()
+                // GET 请求公开
                 .requestMatchers(HttpMethod.GET, "/api/v1/articles/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tags/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/articles/*/comments").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/articles/*/comments").permitAll()
+                // 评论和举报公开
+                .requestMatchers(HttpMethod.POST, "/api/v1/articles/*/comments").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/reports").permitAll()
-                .requestMatchers("/api/v1/captcha/**").permitAll()
+                // 静态资源
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // 管理员接口
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // 其余需要登录
                 .anyRequest().authenticated()
             )

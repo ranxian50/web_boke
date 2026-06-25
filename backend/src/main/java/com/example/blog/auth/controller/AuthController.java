@@ -3,6 +3,7 @@ package com.example.blog.auth.controller;
 import com.example.blog.auth.dto.LoginRequest;
 import com.example.blog.auth.dto.LoginResponse;
 import com.example.blog.auth.dto.RegisterRequest;
+import com.example.blog.auth.dto.UserUpdateRequest;
 import com.example.blog.auth.entity.User;
 import com.example.blog.auth.jwt.JwtUtil;
 import com.example.blog.auth.repository.UserRepository;
@@ -94,8 +95,26 @@ public class AuthController {
      * 获取当前登录用户信息
      */
     @GetMapping("/me")
-    public Result<LoginResponse.UserInfo> me() {
-        // 从 SecurityContext 获取当前用户
-        return Result.success(null); // 简化处理，后续完善
+    public Result<LoginResponse.UserInfo> me(Authentication auth) {
+        String username = auth.getName();
+        User user = userService.findByUsername(username);
+        return Result.success(new LoginResponse.UserInfo(
+                user.getId(), user.getUsername(),
+                user.getNickname(), user.getAvatar(), user.getRole()));
+    }
+
+    /**
+     * 更新当前用户信息（昵称、头像）
+     */
+    @PutMapping("/profile")
+    public Result<LoginResponse.UserInfo> updateProfile(
+            @Valid @RequestBody UserUpdateRequest request,
+            Authentication auth) {
+        String username = auth.getName();
+        User user = userService.findByUsername(username);
+        User updated = userService.updateProfile(user.getId(), request.getNickname(), request.getAvatar());
+        return Result.success(new LoginResponse.UserInfo(
+                updated.getId(), updated.getUsername(),
+                updated.getNickname(), updated.getAvatar(), updated.getRole()));
     }
 }

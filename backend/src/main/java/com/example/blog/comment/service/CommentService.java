@@ -2,8 +2,12 @@ package com.example.blog.comment.service;
 
 import com.example.blog.comment.entity.Comment;
 import com.example.blog.comment.repository.CommentRepository;
+import com.example.blog.common.PageResult;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,5 +87,25 @@ public class CommentService {
             throw new EntityNotFoundException("评论不存在");
         }
         commentRepository.deleteById(id);
+    }
+
+    /** 分页查询所有评论（管理员用） */
+    public PageResult<Map<String, Object>> getCommentsForAdmin(int page, int size) {
+        PageRequest pr = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createTime"));
+        Page<Comment> commentPage = commentRepository.findAllByOrderByCreateTimeDesc(pr);
+
+        List<Map<String, Object>> records = commentPage.getContent().stream().map(c -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", c.getId());
+            m.put("articleId", c.getArticleId());
+            m.put("parentId", c.getParentId());
+            m.put("nickname", c.getNickname());
+            m.put("email", c.getEmail());
+            m.put("content", c.getContent());
+            m.put("createTime", c.getCreateTime());
+            return m;
+        }).collect(Collectors.toList());
+
+        return new PageResult<>(records, commentPage.getTotalElements(), page, size);
     }
 }

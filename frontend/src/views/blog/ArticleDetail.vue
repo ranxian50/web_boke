@@ -85,13 +85,11 @@ async function submitReport() {
   reportLoading.value = true
   try {
     const nickname = reportForm.nickname || authStore.user.nickname || '匿名'
-    await request.post('/reports', null, {
-      params: {
-        articleId: article.value.id,
-        nickname: nickname,
-        reason: reportForm.reason,
-        description: reportForm.description
-      }
+    await request.post('/reports', {
+      articleId: article.value.id,
+      nickname: nickname,
+      reason: reportForm.reason,
+      description: reportForm.description
     })
     ElMessage.success('举报已提交，管理员会尽快处理')
     showReportDialog.value = false

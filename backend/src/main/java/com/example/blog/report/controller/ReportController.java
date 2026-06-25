@@ -31,7 +31,7 @@ public class ReportController {
 
     /** 获取举报列表（管理员） */
     @GetMapping
-    public Result<PageResult<Report>> listReports(
+    public Result<PageResult<Map<String, Object>>> listReports(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status) {
